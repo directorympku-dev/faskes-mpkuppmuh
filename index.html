@@ -102,90 +102,7 @@ body:not(.adm) .admonly,body:not(.adm) [data-ed],body:not(.adm) [data-del],body:
 body.adm #adm{display:none}
 .admtag{display:none;align-items:center;font-size:12.5px;font-weight:600;color:var(--gd);background:var(--gl);border-radius:99px;padding:4px 11px}body.adm .admtag{display:inline-flex}
 </style>
-<style>
-/* ===== MODE MAINTENANCE ===== */
-#mtn{display:none}
-html.mt #mtn{display:grid}
-html.mt body>*:not(#mtn){display:none!important}
-html.mt,html.mt body{height:100%;overflow:hidden;background:#04221a}
-#mtn{position:fixed;inset:0;z-index:2147483647;place-items:center;overflow:auto;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));color:#eaf6ef;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:radial-gradient(1100px 700px at 12% -10%,#0b7a44 0%,transparent 60%),radial-gradient(900px 600px at 100% 115%,#6f5900 0%,transparent 55%),linear-gradient(160deg,#03160f,#062e20 55%,#04221a)}
-#mtn *{box-sizing:border-box}
-.mt-bg{position:fixed;inset:0;overflow:hidden;pointer-events:none}
-.mt-bg::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%)}
-.mt-bg i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;animation:mtf 16s ease-in-out infinite alternate}
-.mt-bg i:nth-child(1){width:360px;height:360px;left:-80px;top:8%;background:#13a45a}
-.mt-bg i:nth-child(2){width:300px;height:300px;right:-60px;bottom:6%;background:#f5c400;opacity:.28;animation-duration:20s}
-.mt-bg i:nth-child(3){width:240px;height:240px;left:45%;top:-80px;background:#0e8c8f;opacity:.3;animation-duration:24s}
-@keyframes mtf{to{transform:translate(40px,-30px) scale(1.15)}}
-.mt-card{position:relative;width:min(580px,100%);text-align:center;padding:34px 28px 24px;border-radius:28px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 30px 80px -30px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.18)}
-.mt-logos{display:flex;gap:10px;justify-content:center;margin-bottom:6px}
-.mt-logos img{height:54px;max-width:130px;object-fit:contain;background:#fff;border-radius:14px;padding:6px 10px}
-.mt-logos img[hidden]{display:none}
-#mtl1{background:linear-gradient(135deg,#0b7a44,#005a2c);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
-.mt-gears{width:150px;height:112px;margin:2px auto -4px;display:block}
-.mt-gears .gr{transform-box:fill-box;transform-origin:center;animation:mtr 9s linear infinite}
-.mt-gears .gr.b{animation-duration:6s;animation-direction:reverse}
-@keyframes mtr{to{transform:rotate(360deg)}}
-.mt-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:999px;background:rgba(245,196,0,.14);border:1px solid rgba(245,196,0,.45);color:#ffe27a;font-size:13px;font-weight:600;letter-spacing:.03em}
-.mt-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#f5c400;box-shadow:0 0 0 0 rgba(245,196,0,.7);animation:mtp 1.8s infinite}
-@keyframes mtp{70%{box-shadow:0 0 0 9px rgba(245,196,0,0)}100%{box-shadow:0 0 0 0 rgba(245,196,0,0)}}
-.mt-card h1{margin:16px 0 10px;font-size:clamp(26px,6.4vw,40px);line-height:1.15;font-weight:800;letter-spacing:-.02em;color:#fff;background:linear-gradient(90deg,#fff 30%,#f7e48e);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.mt-card p{margin:0 auto;max-width:46ch;font-size:16px;line-height:1.6;color:rgba(234,246,239,.82)}
-.mt-bar{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;margin:24px 0 6px}
-.mt-bar span{display:block;height:100%;width:38%;border-radius:99px;background:linear-gradient(90deg,#f5c400,#fff3b0,#f5c400);animation:mtb 1.9s ease-in-out infinite}
-@keyframes mtb{from{transform:translateX(-110%)}to{transform:translateX(280%)}}
-.mt-eta{margin-top:16px;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.1);font-size:14px;color:rgba(234,246,239,.8)}
-.mt-eta[hidden]{display:none}
-.mt-eta b{display:block;margin-top:2px;font-size:26px;font-weight:700;letter-spacing:.04em;color:#f5c400;font-variant-numeric:tabular-nums}
-.mt-act button{margin-top:20px;border:0;border-radius:999px;padding:13px 26px;font-size:15px;font-weight:600;line-height:1;font-family:inherit;background:#f5c400;color:#2a2200;cursor:pointer;transition:transform .15s,box-shadow .15s}
-.mt-act button:hover{transform:translateY(-1px);box-shadow:0 10px 24px -10px rgba(245,196,0,.8)}
-.mt-act button:focus-visible{outline:3px solid #fff;outline-offset:3px}
-.mt-foot{margin-top:20px!important;font-size:12.5px!important;color:rgba(234,246,239,.55)!important}
-@media(prefers-reduced-motion:reduce){#mtn *,#mtn *::before{animation:none!important}}
-</style>
-<script>
-/* ===== MODE MAINTENANCE =====
-   on:true  = website ditutup, pengunjung hanya melihat halaman maintenance.
-   on:false = website dibuka kembali seperti biasa.
-   eta      = perkiraan selesai (opsional), contoh: "2026-11-25T08:00:00+07:00". Kosongkan "" jika tidak ada. */
-window.MT={on:true,title:"Website sedang maintenance",msg:"Kami sedang melakukan pemeliharaan sistem untuk meningkatkan layanan. Mohon maaf atas ketidaknyamanannya, silakan kembali beberapa saat lagi.",eta:""};
-if(MT.on){document.documentElement.classList.add("mt");document.title="Maintenance | "+document.title}
-</script>
 </head><body>
-<div id="mtn" role="alert" aria-live="polite">
-<div class="mt-bg" aria-hidden="true"><i></i><i></i><i></i></div>
-<section class="mt-card">
-<div class="mt-logos"><img id="mtl1" alt="Logo Muhammadiyah" hidden><img id="mtl2" alt="Logo MPKU" hidden></div>
-<svg class="mt-gears" viewBox="0 0 150 112" aria-hidden="true">
-<g class="gr"><circle cx="58" cy="62" r="29" fill="none" stroke="#f5c400" stroke-width="10" stroke-dasharray="7.6 7.3"/><circle cx="58" cy="62" r="24" fill="#f5c400"/><circle cx="58" cy="62" r="11" fill="#06301f"/></g>
-<g class="gr b"><circle cx="109" cy="38" r="19" fill="none" stroke="#ffffff" stroke-opacity=".85" stroke-width="8" stroke-dasharray="6 5.9"/><circle cx="109" cy="38" r="15" fill="#ffffff" fill-opacity=".85"/><circle cx="109" cy="38" r="7" fill="#06301f"/></g>
-</svg>
-<span class="mt-badge">Pemeliharaan sistem</span>
-<h1 id="mttl">Website sedang maintenance</h1>
-<p id="mtmsg"></p>
-<div class="mt-bar" aria-hidden="true"><span></span></div>
-<div class="mt-eta" id="mteta" hidden><span id="mtlb"></span><b id="mtcd"></b></div>
-<div class="mt-act"><button id="mtre" type="button">Muat ulang halaman</button></div>
-<p class="mt-foot">Direktori Amal Usaha Kesehatan Muhammadiyah ’Aisyiyah</p>
-</section>
-</div>
-<script>
-(function(){
-  if(!window.MT||!MT.on)return;
-  const $=id=>document.getElementById(id);
-  $("mttl").textContent=MT.title;$("mtmsg").textContent=MT.msg;
-  $("mtre").onclick=()=>location.reload();
-  document.addEventListener("DOMContentLoaded",()=>{[["l1","mtl1"],["l2","mtl2"]].forEach(([a,b])=>{const s=$(a),t=$(b);if(s&&s.getAttribute("src")){t.src=s.getAttribute("src");t.hidden=false}})});
-  const eta=MT.eta?new Date(MT.eta):null;
-  if(eta&&!isNaN(eta)){
-    $("mteta").hidden=false;
-    $("mtlb").textContent="Perkiraan selesai "+eta.toLocaleString("id-ID",{dateStyle:"long",timeStyle:"short"});
-    const p=n=>String(n).padStart(2,"0");
-    const tick=()=>{const d=eta-Date.now();if(d<=0){$("mtcd").textContent="Segera kembali online";return}
-      $("mtcd").textContent=p(Math.floor(d/36e5))+":"+p(Math.floor(d%36e5/6e4))+":"+p(Math.floor(d%6e4/1e3))};
-    tick();setInterval(tick,1000)}
-})();
-</script>
 
 <header>
 <svg class="bgh" viewBox="0 0 800 200" preserveAspectRatio="xMaxYMax slice" aria-hidden="true"><defs><pattern id="wn" width="22" height="26" patternUnits="userSpaceOnUse"><rect x="6" y="7" width="10" height="13" rx="1" fill="#00793c"/></pattern></defs>
@@ -273,7 +190,7 @@ if(MT.on){document.documentElement.classList.add("mt");document.title="Maintenan
 <div class="w act" style="border:0"><button class="p">Simpan</button><button type="button" id="cx">Batal</button></div>
 </form></dialog>
 
-<script type="text/plain" id="app">
+<script>
 const PROV=["ACEH","BALI","KEPULAUAN BANGKA BELITUNG","BANTEN","BENGKULU","DAERAH ISTIMEWA YOGYAKARTA","DKI JAKARTA","GORONTALO","JAMBI","JAWA BARAT","JAWA TENGAH","JAWA TIMUR","KALIMANTAN BARAT","KALIMANTAN SELATAN","KALIMANTAN TENGAH","KALIMANTAN TIMUR","KALIMANTAN UTARA","KEPULAUAN RIAU","LAMPUNG","MALUKU","MALUKU UTARA","NUSA TENGGARA BARAT","NUSA TENGGARA TIMUR","PAPUA","PAPUA BARAT","PAPUA BARAT DAYA","PAPUA PEGUNUNGAN","PAPUA SELATAN","PAPUA TENGAH","RIAU","SULAWESI BARAT","SULAWESI SELATAN","SULAWESI TENGAH","SULAWESI TENGGARA","SULAWESI UTARA","SUMATERA BARAT","SUMATERA SELATAN","SUMATERA UTARA"];
 const COLS=[["prov","Provinsi"],["jenis","Jenis"],["nama","Nama Fasilitas"],["klas","Tipe"],["tt","Tempat Tidur"],["direktur","Direktur"],["masa","Masa Jabatan"],["hpdir","No HP Direktur"],["telp","Telepon"],["fax","Fax"],["email","Email"],["kota","Kota/Kabupaten"],["alamat","Alamat"],["nib","NIB"],["nibst","Status NIB"],["akst","Status Akreditasi"],["tgsk","Tanggal SK Akreditasi"],["tgend","Tanggal Berakhir"],["bpjs","Kerjasama BPJS"],["grup","Grup"],["kedudukan","Kedudukan"],["desk","Deskripsi"],["web","Website"]];
 const KEY="faskes_muh_v2",$=i=>document.getElementById(i);
@@ -695,4 +612,4 @@ $("ccx").onclick=()=>$("cdlg").close();$("adm").onclick=()=>showConn();$("lo").o
 setInterval(()=>{if((CFG.url||GAS)&&!dlg.open&&!$("cdlg").open&&!document.hidden)load(true)},45000);
 render();if(CFG.url||GAS)load();else setSt("Alamat server belum diisi");
 </script>
-<script>if(!(window.MT&&MT.on)){var s=document.createElement("script");s.textContent=document.getElementById("app").textContent;document.body.appendChild(s)}</script></body></html>
+</body></html>
