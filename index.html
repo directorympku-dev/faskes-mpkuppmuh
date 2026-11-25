@@ -148,7 +148,7 @@ html.mt,html.mt body{height:100%;overflow:hidden;background:#04221a}
    on:true  = website ditutup, pengunjung hanya melihat halaman maintenance.
    on:false = website dibuka kembali seperti biasa.
    eta      = perkiraan selesai (opsional), contoh: "2026-11-25T08:00:00+07:00". Kosongkan "" jika tidak ada. */
-window.MT={on:false,title:"Website sedang maintenance",msg:"Kami sedang melakukan pemeliharaan sistem untuk meningkatkan layanan. Mohon maaf atas ketidaknyamanannya, silakan kembali beberapa saat lagi.",eta:""};
+window.MT={on:true,title:"Website sedang maintenance",msg:"Kami sedang melakukan pemeliharaan sistem untuk meningkatkan layanan. Mohon maaf atas ketidaknyamanannya, silakan kembali beberapa saat lagi.",eta:""};
 if(MT.on){document.documentElement.classList.add("mt");document.title="Maintenance | "+document.title}
 </script>
 </head><body>
@@ -205,7 +205,7 @@ if(MT.on){document.documentElement.classList.add("mt");document.title="Maintenan
 <select id="fk" title="Filter tipe/kelas RS"></select>
 <select id="fg"><option value="">Semua grup</option></select>
 <select id="vw" title="Cara menampilkan daftar"><option value="prov">Per provinsi</option><option value="grup">Per grup</option></select>
-<button class="p" id="add">+ Tambah</button><button id="menu">☰ Menu</button><button id="adm">🔒 Masuk Admin</button><span class="admtag" id="admtag"></span>
+<button class="p" id="add">+ Tambah</button><button id="menu">☰ Menu</button><button id="adm">🔒 Masuk Admin</button><span class="admtag" id="admtag"></span><button class="admonly" id="lo2" title="Keluar dari mode admin">⎋ Keluar</button>
 <div class="sts"><span id="st">Belum terhubung</span><button id="rf" title="Muat ulang data">↻ Muat ulang</button></div>
 <input type="file" id="file" accept=".xlsx,.json" hidden><input type="file" id="gfile" accept=".xlsx" hidden>
 </div>
@@ -691,7 +691,7 @@ $("mdlg").addEventListener("click",e=>{if(e.target===$("mdlg")||e.target.closest
 $("cok").onclick=async()=>{if(!EMB&&!GAS)CFG.url=$("cu").value.trim();CFG.user=$("cn").value.trim();CFG.pw=$("cp").value;$("ce").textContent="Memeriksa…";
   try{await api("login");if(!EMB&&!GAS)lss("faskes_url",CFG.url);sss("faskes_user",CFG.user);sss("faskes_pw",CFG.pw);setAdm(true);$("cdlg").close();await load()}
   catch(e){CFG.user=CFG.pw="";$("ce").textContent="Gagal: "+e.message}};
-$("ccx").onclick=()=>$("cdlg").close();$("adm").onclick=()=>showConn();$("lo").onclick=()=>{logout();load()};$("rf").onclick=()=>load();
+$("ccx").onclick=()=>$("cdlg").close();$("adm").onclick=()=>showConn();$("lo").onclick=$("lo2").onclick=()=>{logout();load();setSt("Anda sudah keluar dari mode admin")};$("rf").onclick=()=>load();
 setInterval(()=>{if((CFG.url||GAS)&&!dlg.open&&!$("cdlg").open&&!document.hidden)load(true)},45000);
 render();if(CFG.url||GAS)load();else setSt("Alamat server belum diisi");
 </script>
