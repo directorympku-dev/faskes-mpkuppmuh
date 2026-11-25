@@ -101,6 +101,10 @@ a{overflow-wrap:anywhere}
 body:not(.adm) .admonly,body:not(.adm) [data-ed],body:not(.adm) [data-del],body:not(.adm) #de,body:not(.adm) #add,body:not(.adm) #menu{display:none!important}
 body.adm #adm{display:none}
 .admtag{display:none;align-items:center;font-size:12.5px;font-weight:600;color:var(--gd);background:var(--gl);border-radius:99px;padding:4px 11px}body.adm .admtag{display:inline-flex}
+/* Panel Admin */
+#pdlg{max-width:520px}#pdlg .ps{padding:12px 16px 4px;display:grid;gap:9px}#pdlg h4{margin:0;color:var(--gd);font-size:12.5px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--ln);padding-bottom:3px}
+#pdlg .ps+.ps{border-top:1px dashed var(--ln);margin-top:8px;padding-top:14px}.ach{display:inline-block;margin:2px 4px 2px 0;padding:2px 10px;border-radius:99px;background:var(--gl);color:var(--gd);font-size:12.5px;font-weight:600}
+#pe{min-height:18px;font-size:13px;padding:6px 16px 0}#pdlg .hint{font-size:11.5px;color:var(--mu);margin:-3px 0 0}
 </style>
 </head><body>
 
@@ -140,6 +144,21 @@ body.adm #adm{display:none}
 <label>Kata sandi<input id="cp" type="password" autocomplete="current-password"></label>
 <div id="ce" style="color:var(--rd);font-size:13px"></div>
 <div class="act" style="border:0"><button class="p" id="cok" type="button">Masuk</button><button type="button" id="ccx">Tutup</button></div></div></dialog>
+<dialog id="pdlg"><div class="dh">Panel Admin</div>
+<div class="ps"><h4>Ubah kata sandi saya</h4>
+<label>Kata sandi lama<input id="po" type="password" autocomplete="current-password"></label>
+<label>Kata sandi baru<input id="pn" type="password" autocomplete="new-password"></label>
+<label>Ulangi kata sandi baru<input id="pn2" type="password" autocomplete="new-password"></label>
+<p class="hint">Minimal 8 karakter.</p>
+<div class="act" style="border:0;padding:0"><button class="p" id="pcg" type="button">Simpan kata sandi</button></div></div>
+<div class="ps"><h4>Tambah admin baru</h4>
+<label>Username<input id="au" autocomplete="off" autocapitalize="off" placeholder="huruf kecil, angka, titik, - atau _"></label>
+<label>Kata sandi<input id="ap" type="password" autocomplete="new-password"></label>
+<label>Ulangi kata sandi<input id="ap2" type="password" autocomplete="new-password"></label>
+<div class="act" style="border:0;padding:0"><button class="p" id="pad" type="button">Tambah admin</button></div></div>
+<div class="ps"><h4>Admin terdaftar</h4><div id="plist"></div></div>
+<div id="pe"></div>
+<div class="act" style="padding:10px 16px 14px;border:0"><button id="pcx" type="button">Tutup</button></div></dialog>
 <dialog id="mdlg"><div class="dh">Menu</div><div class="mn">
 <h4>Impor dari Excel</h4>
 <button id="imprs">⬆ Impor Rumah Sakit saja</button>
@@ -148,6 +167,8 @@ body.adm #adm{display:none}
 <h4>Grouping</h4>
 <button id="gimp">⬆ Impor Grouping (file Excel)</button>
 <button id="gsheet">↻ Sinkron dari Tab Grouping</button>
+<h4>Admin</h4>
+<button id="padm">👥 Panel Admin (ubah sandi &amp; tambah admin)</button>
 <h4>Ekspor &amp; perawatan data</h4>
 <button id="exp">⬇ Ekspor Excel</button>
 <button id="fixph">📞 Rapikan Nomor</button>
@@ -603,6 +624,29 @@ $("fixph").onclick=async()=>{
   chg.forEach(c=>c.r[c.k]=c.n);render();
   await run(async()=>{for(let i=0;i<rs.length;i+=150)await api("upsertMany",{rows:rs.slice(i,i+150)})});
   alert(`${chg.length} nomor dirapikan.`)};
+/* ===== Panel Admin ===== */
+const pmsg=(t,ok)=>{$("pe").textContent=t||"";$("pe").style.color=ok?"var(--g)":"var(--rd)"};
+const pbusy=on=>{$("pcg").disabled=$("pad").disabled=on};
+async function loadAdmins(){const b=$("plist");b.textContent="Memuat…";
+  try{const j=await api("listAdmins");b.innerHTML=(j.admins||[]).map(a=>{const u=typeof a==="string"?a:a.user;return `<span class="ach">${esc(u)}${String(u).toLowerCase()===String(CFG.user).toLowerCase()?" (Anda)":""}</span>`}).join("")||"<i>Belum ada data</i>"}
+  catch(e){b.textContent="Daftar admin tidak tersedia: "+e.message}}
+$("padm").onclick=()=>{["po","pn","pn2","au","ap","ap2"].forEach(i=>$(i).value="");pmsg("");$("pdlg").showModal();loadAdmins()};
+$("pcx").onclick=()=>$("pdlg").close();
+$("pcg").onclick=async()=>{const o=$("po").value,n=$("pn").value,n2=$("pn2").value;
+  if(o!==CFG.pw)return pmsg("Kata sandi lama salah.");
+  if(n.length<8)return pmsg("Kata sandi baru minimal 8 karakter.");
+  if(n!==n2)return pmsg("Pengulangan kata sandi baru tidak sama.");
+  if(n===o)return pmsg("Kata sandi baru harus berbeda dari yang lama.");
+  pbusy(true);pmsg("Menyimpan…",1);
+  try{await api("changePw",{newPw:n});CFG.pw=n;sss("faskes_pw",n);["po","pn","pn2"].forEach(i=>$(i).value="");pmsg("✔ Kata sandi berhasil diubah.",1)}
+  catch(e){pmsg("Gagal: "+e.message)}finally{pbusy(false)}};
+$("pad").onclick=async()=>{const u=$("au").value.trim().toLowerCase(),p=$("ap").value,p2=$("ap2").value;
+  if(!/^[a-z0-9._-]{3,30}$/.test(u))return pmsg("Username 3–30 karakter: huruf kecil, angka, titik, - atau _.");
+  if(p.length<8)return pmsg("Kata sandi minimal 8 karakter.");
+  if(p!==p2)return pmsg("Pengulangan kata sandi tidak sama.");
+  pbusy(true);pmsg("Menambahkan…",1);
+  try{await api("addAdmin",{newUser:u,newPw:p});["au","ap","ap2"].forEach(i=>$(i).value="");pmsg("✔ Admin \""+u+"\" berhasil ditambahkan.",1);loadAdmins()}
+  catch(e){pmsg("Gagal: "+e.message)}finally{pbusy(false)}};
 $("menu").onclick=()=>$("mdlg").showModal();
 $("mdlg").addEventListener("click",e=>{if(e.target===$("mdlg")||e.target.closest("button"))$("mdlg").close()});
 $("cok").onclick=async()=>{if(!EMB&&!GAS)CFG.url=$("cu").value.trim();CFG.user=$("cn").value.trim();CFG.pw=$("cp").value;$("ce").textContent="Memeriksa…";
