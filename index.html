@@ -98,6 +98,9 @@ html{-webkit-text-size-adjust:100%}
 @media(max-width:860px){#mapw{grid-template-columns:minmax(0,1fr)}.mapbox svg{min-width:640px}}
 @media(max-width:600px){.pill{font-size:11.5px}.grid{grid-template-columns:minmax(0,1fr)}.mp{max-height:none}.kc{gap:6px}.kb{padding:6px 10px}}
 a{overflow-wrap:anywhere}
+body:not(.adm) .admonly,body:not(.adm) [data-ed],body:not(.adm) [data-del],body:not(.adm) #de,body:not(.adm) #add,body:not(.adm) #menu{display:none!important}
+body.adm #adm{display:none}
+.admtag{display:none;align-items:center;font-size:12.5px;font-weight:600;color:var(--gd);background:var(--gl);border-radius:99px;padding:4px 11px}body.adm .admtag{display:inline-flex}
 </style>
 <style>
 /* ===== MODE MAINTENANCE ===== */
@@ -202,7 +205,7 @@ if(MT.on){document.documentElement.classList.add("mt");document.title="Maintenan
 <select id="fk" title="Filter tipe/kelas RS"></select>
 <select id="fg"><option value="">Semua grup</option></select>
 <select id="vw" title="Cara menampilkan daftar"><option value="prov">Per provinsi</option><option value="grup">Per grup</option></select>
-<button class="p" id="add">+ Tambah</button><button id="menu">☰ Menu</button>
+<button class="p" id="add">+ Tambah</button><button id="menu">☰ Menu</button><button id="adm">🔒 Masuk Admin</button><span class="admtag" id="admtag"></span>
 <div class="sts"><span id="st">Belum terhubung</span><button id="rf" title="Muat ulang data">↻ Muat ulang</button></div>
 <input type="file" id="file" accept=".xlsx,.json" hidden><input type="file" id="gfile" accept=".xlsx" hidden>
 </div>
@@ -212,13 +215,14 @@ if(MT.on){document.documentElement.classList.add("mt");document.title="Maintenan
 <aside class="mp" id="mp"></aside></div></details>
 <div id="kc" class="kc"></div>
 <div id="list" style="margin-top:6px"></div></main>
-<footer>Data tersimpan di Google Sheets dan otomatis sama di semua perangkat. Ekspor Excel berguna sebagai cadangan.</footer>
+<footer>Data bersumber dari Google Sheets dan sama di semua perangkat. Penambahan, perubahan, penghapusan, dan unggah data hanya dapat dilakukan oleh admin.</footer>
 
-<dialog id="cdlg"><div class="dh">Hubungkan ke Google Sheets</div><div style="padding:14px 16px;display:grid;gap:9px">
+<dialog id="cdlg"><div class="dh">Masuk Admin</div><div style="padding:14px 16px;display:grid;gap:9px">
 <label>URL Web App (dari Apps Script)<input id="cu" placeholder="https://script.google.com/macros/s/…/exec"></label>
-<label>Kata sandi<input id="cp" type="password"></label>
+<label>Username<input id="cn" autocomplete="username" autocapitalize="off"></label>
+<label>Kata sandi<input id="cp" type="password" autocomplete="current-password"></label>
 <div id="ce" style="color:var(--rd);font-size:13px"></div>
-<div class="act" style="border:0"><button class="p" id="cok" type="button">Hubungkan</button><button type="button" id="ccx">Tutup</button></div></div></dialog>
+<div class="act" style="border:0"><button class="p" id="cok" type="button">Masuk</button><button type="button" id="ccx">Tutup</button></div></div></dialog>
 <dialog id="mdlg"><div class="dh">Menu</div><div class="mn">
 <h4>Impor dari Excel</h4>
 <button id="imprs">⬆ Impor Rumah Sakit saja</button>
@@ -230,7 +234,7 @@ if(MT.on){document.documentElement.classList.add("mt");document.title="Maintenan
 <h4>Ekspor &amp; perawatan data</h4>
 <button id="exp">⬇ Ekspor Excel</button>
 <button id="fixph">📞 Rapikan Nomor</button>
-<button id="conn">🔗 Sambungan Google Sheets</button>
+<button id="lo">⎋ Keluar dari mode admin</button>
 <button class="d" id="clr">Hapus semua data</button>
 <button type="button" id="mx">Tutup</button></div></dialog>
 <dialog id="ddlg"><div class="dh" id="dn"></div><div id="db" style="padding:6px 16px 4px;max-height:68vh;overflow:auto"></div>
@@ -279,21 +283,25 @@ const uid=()=>Date.now()+""+Math.random().toString(36).slice(2,7);
 let rows=[];const notProv=r=>!PROV.includes(String(r.nama||"").trim().toUpperCase());
 const lsg=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lss=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const GAS=!!(window.google&&google.script&&google.script.run);
-const CFG={url:lsg("faskes_url"),pw:lsg("faskes_pw")};
+const API_URL="https://script.google.com/macros/s/AKfycbxkQZTqGZqphiiH4CaplgbGMu9mDBkN4XabX1NFMSIGKmOW1X7L1ziLGFpvY9XKiC27AA/exec"; /* <- tempel URL Web App (/exec) di sini agar semua pengunjung otomatis terhubung */
+const EMB=/^https:\/\//.test(API_URL),ssg=k=>{try{return sessionStorage.getItem(k)||""}catch(e){return""}},sss=(k,v)=>{try{v?sessionStorage.setItem(k,v):sessionStorage.removeItem(k)}catch(e){}};
+const CFG={url:EMB?API_URL:lsg("faskes_url"),user:ssg("faskes_user"),pw:ssg("faskes_pw")};
+let ADMIN=false;const setAdm=on=>{ADMIN=!!on;document.body.classList.toggle("adm",ADMIN);$("admtag").textContent=ADMIN?"👤 "+CFG.user:""};
+const logout=()=>{CFG.user=CFG.pw="";sss("faskes_user","");sss("faskes_pw","");setAdm(false)};
 const setSt=t=>$("st").textContent=t,nowT=()=>new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
 async function api(act,data={}){
-  const body=JSON.stringify({act,pw:CFG.pw,...data});
+  const body=JSON.stringify({act,user:CFG.user,pw:CFG.pw,...data});
   if(GAS)return new Promise((ok,no)=>google.script.run.withSuccessHandler(t=>{const j=JSON.parse(t);j.ok?ok(j):no(new Error(j.error||"Gagal"))}).withFailureHandler(e=>no(new Error(e.message||"Gagal"))).apiCall(body));
-  if(!CFG.url)throw new Error("Belum terhubung ke Google Sheets");
+  if(!CFG.url)throw new Error("Alamat server (URL Web App) belum diisi.");
   let r;try{r=await fetch(CFG.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body})}
   catch(e){throw new Error("Tidak bisa terhubung. Periksa internet dan URL Web App (akses harus 'Siapa saja').")}
   let j;try{j=await r.json()}catch(e){throw new Error("Respons tidak valid. Pastikan URL berakhiran /exec.")}
   if(!j.ok)throw new Error(j.error||"Gagal");return j}
 async function load(quiet){
-  try{if(!quiet)setSt("Memuat…");const j=await api("list");rows=j.rows.filter(notProv);render();setSt("✔ Tersinkron "+nowT())}
-  catch(e){setSt("⚠ "+e.message);if(!quiet&&/sandi|Belum terhubung/.test(e.message))showConn(e.message)}}
+  try{if(!quiet)setSt("Memuat…");const j=await api("list");rows=j.rows.filter(notProv);if(CFG.pw&&!ADMIN)setAdm(true);render();setSt("✔ Tersinkron "+nowT())}
+  catch(e){if(CFG.pw&&/sandi|username|admin|percobaan/i.test(e.message)){logout();return load(quiet)}setSt("⚠ "+e.message)}}
 async function run(fn){try{setSt("Menyimpan…");await fn();setSt("✔ Tersimpan "+nowT())}catch(e){alert("Gagal menyimpan: "+e.message);load()}}
-function showConn(m){if(GAS)$("cu").parentElement.style.display="none";$("cu").value=CFG.url;$("cp").value=CFG.pw;$("ce").textContent=m||"";if(!$("cdlg").open)$("cdlg").showModal()}
+function showConn(m){$("cu").parentElement.style.display=(GAS||EMB)?"none":"";$("cu").value=CFG.url;$("cn").value=CFG.user;$("cp").value="";$("ce").textContent=m||"";if(!$("cdlg").open)$("cdlg").showModal()}
 $("fp").innerHTML='<option value="">Semua provinsi</option>'+PROV.map(p=>`<option>${p}</option>`).join("");
 $("fprov").innerHTML='<option value="">Pilih provinsi</option>'+PROV.map(p=>`<option>${p}</option>`).join("");
 const row=(k,v)=>v?`<dt>${k}</dt><dd>${v}</dd>`:"";
@@ -389,7 +397,7 @@ $("mapw").onkeydown=e=>{const p=e.target.closest&&e.target.closest("[data-p]");i
 
 const dlg=$("dlg"),f=$("f");let editId=null;
 function open_(r){editId=r?r.id:null;$("dt").textContent=r?"Ubah fasilitas":"Tambah fasilitas";f.reset();if(r)for(const k in r)if(f.elements[k])f.elements[k].value=r[k];dlg.showModal()}
-$("add").onclick=()=>open_();$("cx").onclick=()=>dlg.close();
+$("add").onclick=()=>ADMIN&&open_();$("cx").onclick=()=>dlg.close();
 f.onsubmit=()=>{const d=Object.fromEntries(new FormData(f)),row={...d,id:editId||uid()};for(const k of["telp","fax","hpdir"])row[k]=normPhone(row[k]);row.web=webUrl(row.web);
   const i=rows.findIndex(r=>r.id===row.id);if(i>=0)rows[i]=row;else rows.push(row);render();run(()=>api("upsert",{row}))};
 let dId=null;
@@ -410,8 +418,8 @@ function showDetail(id){const r=rows.find(x=>x.id===id);if(!r)return;dId=id;
   +(r.grup?`<h4>Grup RS</h4><dl class="d2">${L("Grup",esc(r.grup))}${L("Kedudukan",esc(r.kedudukan))}</dl>`+(mem.length?`<div style="margin-top:6px"><small style="color:var(--mu)">Anggota lain di grup ini (klik untuk melihat):</small><br>${mem.map(m=>`<span class="chip" data-d="${m.id}">${m.kedudukan==="Koordinator"?"★ ":""}${esc(m.nama)}</span>`).join("")}</div>`:""):"");
   $("db").scrollTop=0;if(!$("ddlg").open)$("ddlg").showModal()}
 $("ddlg").onclick=e=>{const c=e.target.closest("[data-d]");if(c)return showDetail(c.dataset.d);if(e.target===$("ddlg"))$("ddlg").close()};
-$("dx").onclick=()=>$("ddlg").close();$("de").onclick=()=>{const r=rows.find(x=>x.id===dId);$("ddlg").close();if(r)open_(r)};
-$("list").onclick=e=>{const n=e.target.closest("[data-d]");if(n)return showDetail(n.dataset.d);const b=e.target.closest("button");if(!b)return;
+$("dx").onclick=()=>$("ddlg").close();$("de").onclick=()=>{if(!ADMIN)return;const r=rows.find(x=>x.id===dId);$("ddlg").close();if(r)open_(r)};
+$("list").onclick=e=>{const n=e.target.closest("[data-d]");if(n)return showDetail(n.dataset.d);const b=e.target.closest("button");if(!b||!ADMIN)return;
   if(b.dataset.ed)open_(rows.find(r=>r.id===b.dataset.ed));
   if(b.dataset.del&&confirm("Hapus fasilitas ini?")){const id=b.dataset.del;rows=rows.filter(r=>r.id!==id);render();run(()=>api("remove",{id}))}};
 $("clr").onclick=()=>{if(!rows.length)return alert("Data sudah kosong.");
@@ -680,11 +688,11 @@ $("fixph").onclick=async()=>{
   alert(`${chg.length} nomor dirapikan.`)};
 $("menu").onclick=()=>$("mdlg").showModal();
 $("mdlg").addEventListener("click",e=>{if(e.target===$("mdlg")||e.target.closest("button"))$("mdlg").close()});
-$("cok").onclick=async()=>{CFG.url=$("cu").value.trim();CFG.pw=$("cp").value;$("ce").textContent="Menghubungkan…";
-  try{const j=await api("list");lss("faskes_url",CFG.url);lss("faskes_pw",CFG.pw);rows=j.rows.filter(notProv);render();setSt("✔ Tersinkron "+nowT());$("cdlg").close()}
-  catch(e){$("ce").textContent="Gagal: "+e.message}};
-$("ccx").onclick=()=>$("cdlg").close();$("conn").onclick=()=>showConn();$("rf").onclick=()=>load();
-setInterval(()=>{if((CFG.url||GAS)&&CFG.pw&&!dlg.open&&!$("cdlg").open&&!document.hidden)load(true)},45000);
-render();(CFG.url||GAS)&&CFG.pw?load():showConn(GAS?"Masukkan kata sandi untuk mulai.":"Isi URL Web App dan kata sandi untuk mulai.");
+$("cok").onclick=async()=>{if(!EMB&&!GAS)CFG.url=$("cu").value.trim();CFG.user=$("cn").value.trim();CFG.pw=$("cp").value;$("ce").textContent="Memeriksa…";
+  try{await api("login");if(!EMB&&!GAS)lss("faskes_url",CFG.url);sss("faskes_user",CFG.user);sss("faskes_pw",CFG.pw);setAdm(true);$("cdlg").close();await load()}
+  catch(e){CFG.user=CFG.pw="";$("ce").textContent="Gagal: "+e.message}};
+$("ccx").onclick=()=>$("cdlg").close();$("adm").onclick=()=>showConn();$("lo").onclick=()=>{logout();load()};$("rf").onclick=()=>load();
+setInterval(()=>{if((CFG.url||GAS)&&!dlg.open&&!$("cdlg").open&&!document.hidden)load(true)},45000);
+render();if(CFG.url||GAS)load();else setSt("Alamat server belum diisi");
 </script>
 <script>if(!(window.MT&&MT.on)){var s=document.createElement("script");s.textContent=document.getElementById("app").textContent;document.body.appendChild(s)}</script></body></html>
