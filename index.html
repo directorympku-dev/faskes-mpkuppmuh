@@ -222,7 +222,7 @@ const uid=()=>Date.now()+""+Math.random().toString(36).slice(2,7);
 let rows=[];const notProv=r=>!PROV.includes(String(r.nama||"").trim().toUpperCase());
 const lsg=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lss=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const GAS=!!(window.google&&google.script&&google.script.run);
-const API_URL="https://script.google.com/macros/s/AKfycbxkQZTqGZqphiiH4CaplgbGMu9mDBkN4XabX1NFMSIGKmOW1X7L1ziLGFpvY9XKiC27AA/exec"; /* <- tempel URL Web App (/exec) di sini agar semua pengunjung otomatis terhubung */
+const API_URL="https://script.google.com/macros/s/AKfycbwifAhiYWU_qwqoOxRV_-reu94SavlqAaWpKgX0R0UFjY7Kq1cgPh2rPEzaE1ccwdHg/exec"; /* <- tempel URL Web App (/exec) di sini agar semua pengunjung otomatis terhubung */
 const EMB=/^https:\/\//.test(API_URL),ssg=k=>{try{return sessionStorage.getItem(k)||""}catch(e){return""}},sss=(k,v)=>{try{v?sessionStorage.setItem(k,v):sessionStorage.removeItem(k)}catch(e){}};
 const CFG={url:EMB?API_URL:lsg("faskes_url"),user:ssg("faskes_user"),pw:ssg("faskes_pw")};
 let ADMIN=false;const setAdm=on=>{ADMIN=!!on;document.body.classList.toggle("adm",ADMIN);$("admtag").textContent=ADMIN?"👤 "+CFG.user:""};
